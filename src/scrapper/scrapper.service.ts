@@ -3,8 +3,6 @@ import * as puppeteer from 'puppeteer';
 
 @Injectable()
 export class ScrapperService {
-  private numberOfPages: number = 0;
-
   async getDataViaPuppeteer() {
     const browser = await puppeteer.launch({
       headless: false,
@@ -18,14 +16,21 @@ export class ScrapperService {
     });
 
     await page.evaluate(() => {
-      this.numberOfPages = Number(document.querySelector('.pagination_label--max').innerHTML.split('/')[1]);
+      const offers = [];
+      const numberOfPages = Number(document.querySelector('.pagination_label--max').innerHTML.split('/')[1]);
+      const pageItems = document.querySelectorAll('.results__list-container-item');
 
-      document.querySelectorAll('.results__list-container-item').forEach(
+      pageItems.forEach(
         item => {
-          console.log(item.querySelector('.offer-details__title-link').innerHTML);
+          const offerLink = item.querySelector('.offer-details__title-link');
+          if(offerLink){
+           offers.push({ title: offerLink.innerHTML , slug: offerLink.getAttribute('href') });
+          }
         }
       )
 
+      console.log('number of pages', numberOfPages);
+      console.log('offers', offers);
     })
     // await browser.close();
     return 'ok'
